@@ -5,8 +5,8 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.urls import reverse
 from .forms import RegisterForm
-from .models import Account
-from .serializers import CustormToken
+from .models import Account, UserProfile
+from .serializers import CustormToken, UserProfileSerializer, UserInforSerializer
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import status
@@ -58,7 +58,6 @@ class GetUserView(APIView):
                 'first_name': user.first_name,
                 'last_name': user.last_name,
                 'phone_number': user.phone_number,
-                'birth': user.birth,
                 'check': user.is_authenticated,
             }
             return Response(data, status=status.HTTP_200_OK)
@@ -72,17 +71,18 @@ class LoginAPI(TokenObtainPairView):
     def post(self, request, *args, **kwargs):
         print("DATA :",request.data)
         user = Account.objects.get(email=request.data.get('email'))
+        userSerializer = UserInforSerializer(user)
         serializer = self.get_serializer(data=request.data)
         if (serializer.is_valid()):
             data = serializer.validated_data
             response = Response({
                     "message": "Login successfully",
                     "data": {
-                        "access": data.get("access"),
-                        "refresh": data.get("refresh"),
+                        "accessToken": data.get("access"),
+                        "refreshToken": data.get("refresh"),
+                        'user': userSerializer.data
                     },
-                    'Status': 200,
-                    'role': user.role,
+                    'status': 200,
                     'code':"SUCCESS"
                 }, status=status.HTTP_200_OK)
             return response
@@ -90,7 +90,7 @@ class LoginAPI(TokenObtainPairView):
             return Response({
                 "message": "Login failed",
                 "error": serializer.errors,
-                'Status': 400,
+                'status': 400,
                 "code":"ERROR",
                 
             },status=status.HTTP_400_BAD_REQUEST)
@@ -102,7 +102,7 @@ class CustomTokenRefreshView(TokenRefreshView):
             data = {
                 "status": "success",
                 "message": "Token refreshed successfully",
-                "access_token": response.data.get("access"),
+                "accessToken": response.data.get("access"),
                 "code": "SUCCESS",
             }
             return Response(data, status=status.HTTP_200_OK)

@@ -20,6 +20,7 @@ class ManagerUser(BaseUserManager):
         )
         user.set_password(password)
         user.save()
+        profile = UserProfile.objects.create(user=user)
         return user
     def create_superuser(self, email, username, first_name, last_name, phone_number,role, password):
         if not email:
