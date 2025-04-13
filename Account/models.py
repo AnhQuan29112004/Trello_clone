@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, Permission
 # Create your models here.
 
 class ManagerUser(BaseUserManager):
-    def create_user(self, email, username, first_name, last_name, phone_number, password):
+    def create_user(self, email, username, first_name, last_name, phone_number, role, password):
         if not email:
             raise ValueError("Can nhap email")
         if not username:
@@ -15,18 +15,19 @@ class ManagerUser(BaseUserManager):
             username = username,
             first_name = first_name,
             last_name = last_name,
-            phone_number = phone_number
+            phone_number = phone_number,
+            role = role
         )
         user.set_password(password)
         user.save()
         return user
-    def create_superuser(self, email, username, first_name, last_name, phone_number, password):
+    def create_superuser(self, email, username, first_name, last_name, phone_number,role, password):
         if not email:
             raise ValueError("Can nhap email")
         if not username:
             raise ValueError("can nhap username")
         
-        user = self.create_user(email, username, first_name, last_name, phone_number, password)
+        user = self.create_user(email, username, first_name, last_name, phone_number,role, password)
         user.is_super = True
         user.role = Account.RoleChoices.ADMIN
         user.set_password(password)
@@ -40,7 +41,7 @@ class Account(AbstractBaseUser):
     username = models.CharField(max_length=50,null=False,blank=False)
     first_name = models.CharField(max_length=50,null=False,blank=False)
     last_name = models.CharField(max_length=50,null=False,blank=False)
-    email = models.EmailField(max_length=50, null=False, blank=False)
+    email = models.EmailField(unique=True,max_length=50, null=False, blank=False)
     phone_number = models.CharField(max_length=50,null=False,blank=False)
     date_joined = models.DateTimeField(auto_now_add=True)
     last_login = models.DateTimeField(auto_now=True)
@@ -50,7 +51,7 @@ class Account(AbstractBaseUser):
     objects = ManagerUser()
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name','last_name','phone_number']
+    REQUIRED_FIELDS = ['username', 'first_name','last_name','phone_number','role']
     
     is_super = models.BooleanField(default=False)
     

@@ -12,36 +12,11 @@ from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import status
 from .authentication import CookieJWTAuthentication
 from django.contrib.auth.decorators import login_required
+from django.contrib.auth import authenticate
 
 
 # Create your views here.
-# def home(request):
-    
-#     return render(request, 'home.html',{
-#         "user": request.user,
-#     })
-# def register(request):  
-#     form = RegisterForm()
-#     return render(request, 'register.html', {
-#         'form': form,   })
-    
-class LogoutAPI(APIView):
-    permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
 
-    def post(self, request):
-        try:
-            response = Response({
-                "message": "Logout successfully", 
-                "next": reverse("loginview")
-            }, status=status.HTTP_200_OK)
-            
-            response.delete_cookie('refresh')
-            response.delete_cookie('access')
-            return response
-            
-        except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class RegisterAPI(APIView):
@@ -58,10 +33,10 @@ class RegisterAPI(APIView):
                 last_name=form.cleaned_data['last_name'],
                 first_name=form.cleaned_data['first_name'],
                 phone_number=form.cleaned_data['phone_number'],
-                birth=form.cleaned_data['birth']
+                role = form.cleaned_data['role']
             )
             user.save()
-            return Response({"message": "User registered successfully", 'next':reverse("loginview"), 'code':"SUCCESS"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "User registered successfully", 'code':"SUCCESS"}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -71,7 +46,7 @@ def loginview(request):
 
 class GetUserView(APIView):
     permission_classes = [IsAuthenticated]
-    authentication_classes = [CookieJWTAuthentication]
+    authentication_classes = [JWTAuthentication]
 
     def get(self, request):
         try:
@@ -98,8 +73,6 @@ class LoginAPI(TokenObtainPairView):
         print("DATA :",request.data)
         user = Account.objects.get(email=request.data.get('email'))
         serializer = self.get_serializer(data=request.data)
-        next = request.data.get('next', reverse("home"))
-        breakpoint()
         if (serializer.is_valid()):
             data = serializer.validated_data
             response = Response({
@@ -109,7 +82,6 @@ class LoginAPI(TokenObtainPairView):
                         "refresh": data.get("refresh"),
                     },
                     'Status': 200,
-                    'next': next,
                     'role': user.role,
                     'code':"SUCCESS"
                 }, status=status.HTTP_200_OK)

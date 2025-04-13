@@ -18,6 +18,7 @@ class CustormToken(TokenObtainPairSerializer):
     
     def validate(self, attrs):
         data = super().validate(attrs)
+        print(data)
         return {
             "access": data["access"],
             "refresh": data["refresh"],

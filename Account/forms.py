@@ -1,5 +1,5 @@
 from django import forms
-from .models import CustomUser
+from .models import Account
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 
 class RegisterForm(forms.ModelForm):
@@ -15,10 +15,9 @@ class RegisterForm(forms.ModelForm):
         help_text='Required. 8 characters minimum.'
     )
     class Meta:
-        model = CustomUser
-        fields = ['email', 'username', 'last_name', 'first_name', 'phone_number', 'birth','role']
+        model = Account
+        fields = ['email', 'username', 'last_name', 'first_name', 'phone_number','role']
         widgets = {
-            'birth': forms.DateInput(attrs={'type': 'date', 'class': 'form-control'}),
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }
         
@@ -33,7 +32,7 @@ class RegisterForm(forms.ModelForm):
     
     
 class LoginForm(AuthenticationForm):
-    username = forms.EmailField(
+    email = forms.EmailField(
         label='Email',
         widget=forms.EmailInput(attrs={'class': 'form-control'}),
         help_text='Required. Enter your email.'
@@ -48,6 +47,6 @@ class LoginForm(AuthenticationForm):
         data = super().clean()
         email = data.get('username')
         password = data.get('password')
-        if not CustomUser.objects.filter(email=email).exists():
+        if not Account.objects.filter(email=email).exists():
             raise forms.ValidationError("This email is not registered.")
         return data
