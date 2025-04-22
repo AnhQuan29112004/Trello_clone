@@ -1,4 +1,4 @@
-from rest_framework.serializers import ModelSerializer
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
 from Workspace.models import Workspace, Board, List, Card, CardMember
 
 class CardSerializer(ModelSerializer):
@@ -12,7 +12,10 @@ class WorkspaceSerializer(ModelSerializer):
         fields = ['name','description','owner']
         
 class BoardSerializer(ModelSerializer):
-    workspace = WorkspaceSerializer()
+    workspace = PrimaryKeyRelatedField(
+        queryset=Workspace.objects.all(),  # Specify the queryset for the related field
+        write_only=True,
+    )
     class Meta:
         model = Board
         fields = ['workspace','name','background_color']

@@ -9,6 +9,8 @@ class Command(BaseCommand):
         all_users = Account.objects.all()
         all_roles = Account.RoleChoices.choices
         for i in all_users:
+            if i.groups.exists():
+                continue
             if (i.role.lower() in [label.lower() for _,label in all_roles]):
                 group = Group.objects.get(name=i.role.upper())
                 i.groups.add(group)

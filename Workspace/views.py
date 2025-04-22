@@ -5,26 +5,31 @@ from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView
 from Workspace.serializers import WorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework_simplejwt.authentication import JWTAuthentication
 # Create your views here.
 class WorkspaceListAPIView(ListAPIView):
     serializer_class = WorkspaceSerializer
     def get_queryset(self):
-        return Workspace.objects.filter(owner__id = self.request.data.get("owner"))
+        return Workspace.objects.filter(owner__id = self.request.user.id, is_deleted=0)
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         
         page = self.paginate_queryset(queryset)
         if page is not None:
             serializer = self.get_serializer(page, many=True)
-            return self.get_paginated_response(serializer.data)
+            dataPage = self.get_paginated_response(serializer.data)
 
         serializer = self.get_serializer(queryset, many=True)
-        return Response({
-            "status":200,
-            "message":"Get workspace successfully",
-            "code":"SUCCESS",
-            "data": serializer.data
-        })
+        merged_data = {
+        **{
+            "status": 200,
+            "message": "Get workspace successfully",
+            "code": "SUCCESS"
+        },
+        **dataPage  
+}
+        return Response(merged_data, status=status.HTTP_200_OK)
     
 class WorkspaceAddAPIView(CreateAPIView):
     queryset = Workspace.objects.filter(is_deleted=False)

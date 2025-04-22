@@ -144,7 +144,11 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',
         'rest_framework.authentication.SessionAuthentication',
-    ]
+    ],
+    'DEFAULT_PAGINATION_CLASS': 'utils.pagination.pagination.PaginationProject',
+    'PAGE_SIZE': 2,
+    'DATE_FORMAT': '%d/%m/%Y',
+    'DATETIME_FORMAT': '%d/%m/%Y %H:%M:%S',
 }
 
 from datetime import timedelta

@@ -44,7 +44,7 @@ class RegisterAPI(APIView):
 def loginview(request):
     return render(request, 'login.html', )
 
-class GetUserView(APIView):
+class   GetUserView(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
