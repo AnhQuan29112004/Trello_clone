@@ -8,7 +8,6 @@ from utils.workspace.models import UtilModel
 class Workspace(UtilModel):
     name = models.CharField(max_length=50, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
-    owner = models.OneToOneField(Account,on_delete=models.CASCADE, default='')
     member = models.ManyToManyField(Account, through="WorkspaceMember", related_name='memberworkspaces')
     def __str__(self):
         return self.name

@@ -15,20 +15,13 @@ class WorkspaceListAPIView(ListAPIView):
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         
-        page = self.paginate_queryset(queryset)
-        if page is not None:
-            serializer = self.get_serializer(page, many=True)
-            dataPage = self.get_paginated_response(serializer.data)
-
         serializer = self.get_serializer(queryset, many=True)
         merged_data = {
-        **{
             "status": 200,
             "message": "Get workspace successfully",
-            "code": "SUCCESS"
-        },
-        **dataPage  
-}
+            "code": "SUCCESS",
+            "data":serializer.data
+        }
         return Response(merged_data, status=status.HTTP_200_OK)
     
 class WorkspaceAddAPIView(CreateAPIView):

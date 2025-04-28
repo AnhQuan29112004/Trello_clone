@@ -36,8 +36,22 @@ class UserInforSerializer(serializers.ModelSerializer):
         fields = ['email','username','phone_number','email','profile_picture','bio','address']
         
 class UserProfileSerializer(serializers.ModelSerializer):
-    user = UserInforSerializer()
     class Meta:
         model = UserProfile
-        fields = ['user','profile_picture','bio','address']
+        fields = ['profile_picture','bio','address']
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        userAccount = UserInforSerializer(instance.user).data
+        representation = {**representation, **userAccount}
+        for i,j in UserInforSerializer(instance.user).data.items():
+            representation[i] = j
+        return representation
+    
+    def update(self, instance, validated_data):
+        for key, value in validated_data.items():
+            if hasattr(instance, key):
+                setattr(instance, key, value)
+        instance.save()
+        return instance
         

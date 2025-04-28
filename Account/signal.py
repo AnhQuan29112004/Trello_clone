@@ -3,7 +3,11 @@ from django.dispatch import receiver
 from django.contrib.auth import get_user_model
 from django.core.management import call_command 
 from .models import Account
-@post_save(post_save,sender=Account)
-def automatically_add_user_to_group(sender, instance, created, **kwargs):
+from Workspace.models import WorkspaceMember, Workspace
+@receiver(post_save,sender=Account)
+def addRoleToWorkspace(sender, instance, created, **kwargs):
     if created:
-        call_command('add_user_group')
+        nameWP = "wp" + instance.username
+        breakpoint()
+        newWP = Workspace.objects.create(name = nameWP, created_by_id = instance.id)
+        WorkspaceMember.objects.create(workspace_id = newWP.id, user_id = instance.id, role = instance.role)

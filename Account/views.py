@@ -44,25 +44,23 @@ class RegisterAPI(APIView):
 def loginview(request):
     return render(request, 'login.html', )
 
-class   GetUserView(APIView):
+class GetCrrUser(APIView):
     permission_classes = [IsAuthenticated]
     authentication_classes = [JWTAuthentication]
 
     def get(self, request):
         try:
             user = request.user
-            print(user.is_authenticated)
-            data = {
-                'email': user.email,
-                'username': user.username,
-                'first_name': user.first_name,
-                'last_name': user.last_name,
-                'phone_number': user.phone_number,
-                'check': user.is_authenticated,
-            }
-            return Response(data, status=status.HTTP_200_OK)
+            inforUser = UserProfile.objects.get(user=user)
+            serializer = UserProfileSerializer(inforUser)
+            return Response({
+                "message": "Get user successfully",
+                "code":"SUCCESS",
+                "status":200,
+                "data":serializer.data
+            }, status=status.HTTP_200_OK)
         except Exception as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"error": str(e),'code':"ERROR","status":400}, status=status.HTTP_400_BAD_REQUEST)
 
 
 class LoginAPI(TokenObtainPairView):
@@ -78,8 +76,8 @@ class LoginAPI(TokenObtainPairView):
             response = Response({
                     "message": "Login successfully",
                     "data": {
-                        "accessToken": data.get("access"),
-                        "refreshToken": data.get("refresh"),
+                        "access": data.get("access"),
+                        "refresh": data.get("refresh"),
                         'user': userSerializer.data
                     },
                     'status': 200,

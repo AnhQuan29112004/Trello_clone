@@ -30,6 +30,7 @@ class ManagerUser(BaseUserManager):
         
         user = self.create_user(email, username, first_name, last_name, phone_number,role, password)
         user.is_super = True
+        user.is_staff = True
         user.role = Account.RoleChoices.ADMIN
         user.set_password(password)
         user.save()
@@ -55,7 +56,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     REQUIRED_FIELDS = ['username', 'first_name','last_name','phone_number','role']
     
     is_super = models.BooleanField(default=False)
-    
+    is_staff = models.BooleanField(default=False)
     is_active = models.BooleanField(default=True)
 
     def get_full_name(self):
