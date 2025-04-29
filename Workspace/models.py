@@ -46,7 +46,7 @@ class Card(UtilModel):
 class WorkspaceMember(models.Model):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
     user = models.ForeignKey(Account, on_delete=models.CASCADE)
-    role = models.CharField(max_length=50, choices=Account.RoleChoices.choices)
+    role = models.CharField(max_length=50, choices=Account.RoleChoices.choices, default=Account.RoleChoices.WORKSPACEOWN)
 
 class CardMember(models.Model):
     card = models.ForeignKey(Card,on_delete=models.CASCADE)
