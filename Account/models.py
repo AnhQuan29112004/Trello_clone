@@ -4,7 +4,7 @@ from django.contrib.auth.models import Group, Permission, PermissionsMixin
 # Create your models here.
 
 class ManagerUser(BaseUserManager):
-    def create_user(self, email, username, first_name, last_name, phone_number, role, password):
+    def create_user(self, email, username, first_name, last_name, phone_number, password):
         if not email:
             raise ValueError("Can nhap email")
         if not username:
@@ -15,8 +15,7 @@ class ManagerUser(BaseUserManager):
             username = username,
             first_name = first_name,
             last_name = last_name,
-            phone_number = phone_number,
-            role = role
+            phone_number = phone_number
         )
         user.set_password(password)
         user.save()
@@ -53,7 +52,7 @@ class Account(AbstractBaseUser,PermissionsMixin):
     objects = ManagerUser()
     
     USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = ['username', 'first_name','last_name','phone_number','role']
+    REQUIRED_FIELDS = ['username', 'first_name','last_name','phone_number']
     
     is_super = models.BooleanField(default=False)
     is_staff = models.BooleanField(default=False)
