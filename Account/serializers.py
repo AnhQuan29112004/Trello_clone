@@ -55,3 +55,9 @@ class UserProfileSerializer(serializers.ModelSerializer):
         instance.save()
         return instance
         
+class RegisterInfoSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Account
+        fields = ['email','username','phone_number','first_name','last_name']
+        
+    

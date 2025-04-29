@@ -16,7 +16,7 @@ class RegisterForm(forms.ModelForm):
     )
     class Meta:
         model = Account
-        fields = ['email', 'username', 'last_name', 'first_name', 'phone_number','role']
+        fields = ['email', 'username', 'last_name', 'first_name', 'phone_number']
         widgets = {
             'email': forms.EmailInput(attrs={'class': 'form-control'}),
         }

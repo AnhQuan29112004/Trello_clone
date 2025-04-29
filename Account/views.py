@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from django.urls import reverse
 from .forms import RegisterForm
 from .models import Account, UserProfile
-from .serializers import CustormToken, UserProfileSerializer, UserInforSerializer
+from .serializers import RegisterInfoSerializer, CustormToken, UserProfileSerializer, UserInforSerializer
 from django.http import JsonResponse
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 from rest_framework import status
@@ -33,10 +33,9 @@ class RegisterAPI(APIView):
                 last_name=form.cleaned_data['last_name'],
                 first_name=form.cleaned_data['first_name'],
                 phone_number=form.cleaned_data['phone_number'],
-                role = form.cleaned_data['role']
             )
             user.save()
-            return Response({"message": "User registered successfully", 'code':"SUCCESS"}, status=status.HTTP_201_CREATED)
+            return Response({"message": "User registered successfully", 'code':"SUCCESS", 'status':201, 'data':RegisterInfoSerializer(user).data}, status=status.HTTP_201_CREATED)
         else:
             return Response({"error": form.errors}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -67,27 +66,36 @@ class LoginAPI(TokenObtainPairView):
     serializer_class = CustormToken
 
     def post(self, request, *args, **kwargs):
-        print("DATA :",request.data)
-        user = Account.objects.get(email=request.data.get('email'))
-        userSerializer = UserInforSerializer(user)
-        serializer = self.get_serializer(data=request.data)
-        if (serializer.is_valid()):
-            data = serializer.validated_data
-            response = Response({
-                    "message": "Login successfully",
-                    "data": {
-                        "access": data.get("access"),
-                        "refresh": data.get("refresh"),
-                        'user': userSerializer.data
-                    },
-                    'status': 200,
-                    'code':"SUCCESS"
-                }, status=status.HTTP_200_OK)
-            return response
-        else:
+        try:
+            user = Account.objects.get(email=request.data.get('email'))
+            userSerializer = UserInforSerializer(user)
+            serializer = self.get_serializer(data=request.data)
+            if (serializer.is_valid()):
+                data = serializer.validated_data
+                response = Response({
+                        "message": "Login successfully",
+                        "data": {
+                            "access": data.get("access"),
+                            "refresh": data.get("refresh"),
+                            'user': userSerializer.data
+                        },
+                        'status': 200,
+                        'code':"SUCCESS"
+                    }, status=status.HTTP_200_OK)
+                return response
+            else:
+                
+                return Response({
+                    "message": "Login failed",
+                    "error": serializer.errors,
+                    'status': 400,
+                    "code":"ERROR",
+                
+            },status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
             return Response({
                 "message": "Login failed",
-                "error": serializer.errors,
+                "error": str(e),
                 'status': 400,
                 "code":"ERROR",
                 
