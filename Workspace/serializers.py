@@ -1,23 +1,8 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField
 from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
 from Account.serializers import UserProfileSerializer
 
-class WorkspaceSerializer(ModelSerializer):
-    class Meta:
-        model = Workspace
-        fields = ['name','description']
-class CardSerializer(ModelSerializer):
-    class Meta:
-        model = Card
-        fields= ['title','description','file','label','start_date','end_date','list']
 
-class WorkspaceMemberSerializer(ModelSerializer):
-    user = UserProfileSerializer()
-    workspace = WorkspaceSerializer()
-    class Meta:
-        model = WorkspaceMember
-        fields = ['user','workspace','role']
-        
 class BoardSerializer(ModelSerializer):
     workspace = PrimaryKeyRelatedField(
         queryset=Workspace.objects.all(),  # Specify the queryset for the related field
@@ -25,14 +10,38 @@ class BoardSerializer(ModelSerializer):
     )
     class Meta:
         model = Board
-        fields = ['workspace','name','background_color']
+        fields = ['id','workspace','name','background_color']
 
+class WorkspaceSerializer(ModelSerializer):
+    class Meta:
+        model = Workspace
+        fields = ['id','name','description']
+class CardSerializer(ModelSerializer):
+    class Meta:
+        model = Card
+        fields= ['id','title','description','file','label','start_date','end_date','list']
+
+class WorkspaceMemberSerializer(ModelSerializer):
+    user = PrimaryKeyRelatedField(read_only=True)
+    workspace = WorkspaceSerializer()
+    class Meta:
+        model = WorkspaceMember
+        fields = ['user','workspace','role']
+        
+class BoardInWorkspaceSerializer(ModelSerializer):
+    boards = SerializerMethodField()
+    class Meta:
+        model = Workspace
+        fields = ['id',"name","description","boards"]
+        
+    def get_boards(self,obj):
+        return BoardSerializer(obj.boards.all(), many=True).data
 
         
 class ListSerializer(ModelSerializer):
     class Meta:
         model = List
-        fields = ['name','board']
+        fields = ['id','name','board']
         
 
         
