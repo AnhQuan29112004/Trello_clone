@@ -11,7 +11,13 @@ class BoardSerializer(ModelSerializer):
     class Meta:
         model = Board
         fields = ['id','workspace','name','background_color']
-
+    def create(self, validated_data):
+        request = self.context.get("request").data
+        validated_data["workspace"] = Workspace.objects.get(id=request.get("workspace"))
+        breakpoint()
+        return super().create(validated_data)
+    def update(self, instance, validated_data):
+        return super().update(instance, validated_data)
 class WorkspaceSerializer(ModelSerializer):
     class Meta:
         model = Workspace
