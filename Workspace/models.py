@@ -1,5 +1,5 @@
 from django.db import models
-from Account.models import Account
+from Account.models import Account, UserProfile
 from utils.workspace.models import UtilModel
 # Create your models here.
 
@@ -8,7 +8,7 @@ from utils.workspace.models import UtilModel
 class Workspace(UtilModel):
     name = models.CharField(max_length=50, null=False, blank=False)
     description = models.TextField(null=True, blank=True)
-    member = models.ManyToManyField(Account, through="WorkspaceMember", related_name='memberworkspaces')
+    member = models.ManyToManyField(UserProfile, through="WorkspaceMember", related_name='memberworkspaces')
     def __str__(self):
         return self.name
     
@@ -45,7 +45,7 @@ class Card(UtilModel):
     
 class WorkspaceMember(models.Model):
     workspace = models.ForeignKey(Workspace, on_delete=models.CASCADE)
-    user = models.ForeignKey(Account, on_delete=models.CASCADE)
+    user = models.ForeignKey(UserProfile, on_delete=models.CASCADE)
     role = models.CharField(max_length=50, choices=Account.RoleChoices.choices, default=Account.RoleChoices.WORKSPACEOWN)
 
 class CardMember(models.Model):

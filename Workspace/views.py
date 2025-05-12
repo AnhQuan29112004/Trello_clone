@@ -1,17 +1,18 @@
 from django.shortcuts import render
-from Workspace.models import Workspace, Board, List,Card,Comment
+from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
-from Workspace.serializers import WorkspaceSerializer
+from Workspace.serializers import WorkspaceMemberSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 # Create your views here.
 class WorkspaceListAPIView(ListAPIView):
-    serializer_class = WorkspaceSerializer
+    serializer_class = WorkspaceMemberSerializer
     def get_queryset(self):
-        return Workspace.objects.filter(owner__id = self.request.user.id, is_deleted=0)
+        return WorkspaceMember.objects.filter(user__id = self.request.user.id)
+    
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
         
@@ -26,7 +27,7 @@ class WorkspaceListAPIView(ListAPIView):
     
 class WorkspaceAddAPIView(CreateAPIView):
     queryset = Workspace.objects.filter(is_deleted=False)
-    serializer_class = WorkspaceSerializer
+    serializer_class = WorkspaceMemberSerializer
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)
         serializer.is_valid(raise_exception=True)

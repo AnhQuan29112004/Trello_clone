@@ -1,15 +1,22 @@
 from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField
-from Workspace.models import Workspace, Board, List, Card, CardMember
+from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
+from Account.serializers import UserProfileSerializer
 
+class WorkspaceSerializer(ModelSerializer):
+    class Meta:
+        model = Workspace
+        fields = ['name','description']
 class CardSerializer(ModelSerializer):
     class Meta:
         model = Card
         fields= ['title','description','file','label','start_date','end_date','list']
 
-class WorkspaceSerializer(ModelSerializer):
+class WorkspaceMemberSerializer(ModelSerializer):
+    user = UserProfileSerializer()
+    workspace = WorkspaceSerializer()
     class Meta:
-        model = Workspace
-        fields = ['name','description','owner']
+        model = WorkspaceMember
+        fields = ['user','workspace','role']
         
 class BoardSerializer(ModelSerializer):
     workspace = PrimaryKeyRelatedField(
