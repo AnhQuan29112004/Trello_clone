@@ -2,7 +2,7 @@ from django.shortcuts import render
 from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
-from Workspace.serializers import WorkspaceMemberSerializer,BoardInWorkspaceSerializer
+from Workspace.serializers import BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -98,3 +98,21 @@ class WorkspaceGetByIDView(RetrieveAPIView):
             "data":serializer.data
         }
         return Response(response, status=status.HTTP_200_OK)
+
+
+class AddBoardAPIView(CreateAPIView):
+    permission_classes=[IsAuthenticated]
+    authentication_classes=[JWTAuthentication]
+    serializer_class=BoardSerializer
+    def create(self, request, *args, **kwargs):
+        serializer = self.get_serializer(data=request.data, context={"request":request})
+        serializer.is_valid(raise_exception=True)
+        self.perform_create(serializer)
+        headers = self.get_success_headers(serializer.data)
+        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+
+    def perform_create(self, serializer):
+        serializer.created_by = self.request.user
+        serializer.save()
+    
+    
