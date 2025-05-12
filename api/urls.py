@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshView
-from Workspace.views import WorkspaceListAPIView, WorkspaceAddAPIView
+from Workspace.views import WorkspaceGetByIDView, WorkspaceListAPIView, WorkspaceAddAPIView
 version_api = config('VERSION_API')
 
 urlpatterns = [
@@ -16,6 +16,8 @@ urlpatterns = [
     path(f'{version_api}/auth/register', RegisterAPI.as_view(), name='register'),
     path(f'{version_api}/auth/getUser', GetCrrUser.as_view(), name='getUser'),
     path(f'{version_api}/auth/getAccesstoken', CustomTokenRefreshView.as_view(), name='token_refresh'),
-    path(f'{version_api}/workspace/get', WorkspaceListAPIView.as_view(), name='get_workspace'),
+    path(f'{version_api}/workspace/getAll', WorkspaceListAPIView.as_view(), name='get_workspace'),
     path(f'{version_api}/workspace/add', WorkspaceAddAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/get/<int:pk>', WorkspaceGetByIDView.as_view(), name='add_workspace'),
+
 ]
