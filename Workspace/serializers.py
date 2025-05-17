@@ -1,6 +1,7 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField
+from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField, IntegerField, EmailField
 from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
 from Account.serializers import UserProfileSerializer
+from Account.models import Account, UserProfile
 
 
 class BoardSerializer(ModelSerializer):
@@ -27,11 +28,29 @@ class CardSerializer(ModelSerializer):
         fields= ['id','title','description','file','label','start_date','end_date','list']
 
 class WorkspaceMemberSerializer(ModelSerializer):
-    user = PrimaryKeyRelatedField(read_only=True)
-    workspace = WorkspaceSerializer()
+    workspaceID = IntegerField(write_only=True)
+    member = EmailField(write_only=True)
+    
+    user = PrimaryKeyRelatedField(read_only=True, required=False)
+    workspace = WorkspaceSerializer(required=False)
     class Meta:
         model = WorkspaceMember
-        fields = ['user','workspace','role']
+        fields = ['user','workspace','role','workspaceID','member']
+        
+    def create(self, validated_data):
+        account = Account.objects.get(email=validated_data['member'])
+        newUser = UserProfile.objects.get(user=account)
+        workspace = Workspace.objects.get(id=validated_data['workspaceID'])
+        instance= WorkspaceMember.objects.create(
+            user=newUser,
+            workspace=workspace,
+            role="MEMBER"
+        ) 
+        return instance
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        return representation
         
 class BoardInWorkspaceSerializer(ModelSerializer):
     boards = SerializerMethodField()
