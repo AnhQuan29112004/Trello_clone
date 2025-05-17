@@ -23,7 +23,7 @@ class Board(UtilModel):
     
 class List(UtilModel):
     name = models.CharField(max_length=50, null=False, blank=False)
-    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='workspacelists')
+    board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='boardlists')
     class Meta:
         unique_together = [['name','board']] 
     def __str__(self):
@@ -37,7 +37,7 @@ class Card(UtilModel):
     member = models.ManyToManyField(Account, through="CardMember", related_name='membercards')
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
-    list = models.ForeignKey(List, on_delete=models.CASCADE, related_name="cardlist")
+    list = models.ForeignKey(List, on_delete=models.CASCADE, related_name="listcard")
     class Meta:
         unique_together = [['title','list']] 
     def __str__(self):

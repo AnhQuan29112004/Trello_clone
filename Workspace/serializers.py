@@ -14,7 +14,6 @@ class BoardSerializer(ModelSerializer):
     def create(self, validated_data):
         request = self.context.get("request").data
         validated_data["workspace"] = Workspace.objects.get(id=request.get("workspace"))
-        breakpoint()
         return super().create(validated_data)
     def update(self, instance, validated_data):
         return super().update(instance, validated_data)
@@ -42,12 +41,36 @@ class BoardInWorkspaceSerializer(ModelSerializer):
         
     def get_boards(self,obj):
         return BoardSerializer(obj.boards.all(), many=True).data
-
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        breakpoint()
+        representation['role'] = WorkspaceMember.objects.get(workspace=instance.id, user=self.context['request'].user.id).role
+        return representation
         
 class ListSerializer(ModelSerializer):
+    listcard = CardSerializer(many=True)
     class Meta:
         model = List
-        fields = ['id','name','board']
+        fields = ['id','name','board','listcard']
+    def create(self, validated_data):
+        return super().create(validated_data)
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['listcard'] = CardSerializer(instance.listcard.all(), many=True).data
+        return representation
+class DetailBoardSerializer(ModelSerializer):
+    boardlists = ListSerializer(many=True)
+    
+    class Meta:
+        model = Board
+        fields = ['id','name','background_color','boardlists']
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['boardlists'] = ListSerializer(instance.boardlists.all(), many=True).data
+        return representation
         
+    def create(self, validated_data):
+        return super().create(validated_data)
 
         
