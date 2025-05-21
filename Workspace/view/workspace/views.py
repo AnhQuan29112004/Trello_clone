@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
-from Workspace.serializers import ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
+from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView, UpdateAPIView
+from Workspace.serializers import WorkspaceSerializer,ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -113,3 +113,24 @@ class AddUserToWorkspaceAPIView(CreateAPIView):
 
     def perform_create(self, serializer):
         serializer.save()
+
+class WorkspaceUpdateAPIView(UpdateAPIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    serializer_class = WorkspaceSerializer
+    queryset = Workspace.objects.all()
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', True)
+        instance = self.get_object()
+        serializer = self.get_serializer(instance, data=request.data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+        response = {
+            "message":"Success",
+            "code":"SUCCESS",
+            "status":200,
+            "data":serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)
+    def perform_update(self, serializer):
+        serializer.save(updated_by=self.request.user)

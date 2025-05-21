@@ -12,7 +12,7 @@ from Workspace.views import AddListAPIView,AddBoardAPIView,WorkspaceGetByIDView,
 from Workspace.view.card.views import AddCardAPIView
 from Workspace.view.list.views import AddListAPIView
 from Workspace.view.board.views import AddBoardAPIView, DetailBoardAPIView
-from Workspace.view.workspace.views import WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
+from Workspace.view.workspace.views import WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
 version_api = config('VERSION_API')
 
 urlpatterns = [
@@ -28,5 +28,6 @@ urlpatterns = [
     path(f'{version_api}/card/add', AddCardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/board/get/<int:pk>', DetailBoardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/addMember', AddUserToWorkspaceAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/update/<int:pk>', WorkspaceUpdateAPIView.as_view(), name='add_workspace'),
     
 ]
