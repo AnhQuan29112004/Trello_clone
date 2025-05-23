@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView,CreateAPIView,UpdateAPIView, ListCreateAPIView, RetrieveAPIView
 from Workspace.serializers import CardSerializer, ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
@@ -29,3 +29,14 @@ class AddCardAPIView(CreateAPIView):
         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+        
+class UpdateCardAPIView(UpdateAPIView):
+    serializer_class = CardSerializer
+    def get_queryset(self):
+        return Card.objects.filter(
+            list__board__workspace__workspacemember__user_id = self.request.user.profile.id,
+            list__board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+            is_deleted = False
+        )
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
