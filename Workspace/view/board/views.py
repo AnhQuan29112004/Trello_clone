@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import ListAPIView,CreateAPIView, UpdateAPIView, ListCreateAPIView, RetrieveAPIView
 from Workspace.serializers import DetailBoardSerializer, ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
@@ -19,7 +19,13 @@ class AddBoardAPIView(CreateAPIView):
         serializer.is_valid(raise_exception=True)
         self.perform_create(serializer)
         headers = self.get_success_headers(serializer.data)
-        return Response(serializer.data, status=status.HTTP_201_CREATED, headers=headers)
+        response = {
+            "message":"them thanh cong",
+            "code":"SUCCESS",
+            "status":201,
+            "data":serializer.data
+        }
+        return Response(response, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
@@ -28,11 +34,22 @@ class DetailBoardAPIView(RetrieveAPIView):
     serializer_class = DetailBoardSerializer
     def get_queryset(self):
         return Board.objects.filter(
-            workspace__workspacemember__user_id = self.request.user.id,
+            workspace__workspacemember__user_id = self.request.user.profile.id,
             workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
             is_deleted = False
         ).prefetch_related('boardlists__listcard')
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
-    pass
+    
+    
+class UpdateBoardAPIView(UpdateAPIView):
+    serializer_class = BoardSerializer
+    def get_queryset(self):
+        return Board.objects.filter(
+            workspace__workspacemember__user_id = self.request.user.profile.id,
+            workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+            is_deleted = False
+        )
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
     
