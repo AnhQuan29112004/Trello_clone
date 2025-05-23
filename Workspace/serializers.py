@@ -26,8 +26,8 @@ class WorkspaceSerializer(ModelSerializer):
 class CardSerializer(ModelSerializer):
     class Meta:
         model = Card
-        fields= ['id','name','description','file','label','start_date','end_date','list']
-
+        fields= ['id','name','description','file','label','start_date','end_date','list',"tasks"]
+    
 class WorkspaceMemberSerializer(ModelSerializer):
     workspaceID = IntegerField(write_only=True)
     member = EmailField(write_only=True)
