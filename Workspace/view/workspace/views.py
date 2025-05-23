@@ -8,11 +8,12 @@ from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.Error.get_or_404 import Base_get_or_404
+from utils.SearchBase.searchBase import SearchInWorkspaceFilter
 
 class WorkspaceListAPIView(ListAPIView):
     serializer_class = WorkspaceMemberSerializer
     def get_queryset(self):
-        return WorkspaceMember.objects.filter(user__id = self.request.user.id)
+        return WorkspaceMember.objects.filter(user__id = self.request.user.profile.id)
     
     def list(self, request, *args, **kwargs):
         queryset = self.get_queryset()
@@ -52,11 +53,11 @@ class WorkspaceGetByIDView(RetrieveAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
     serializer_class = BoardInWorkspaceSerializer
+    # filter_backends = [SearchInWorkspaceFilter]
     def get_queryset(self):
         return Workspace.objects.filter(
-            workspacemember__user_id = self.request.user.id,
-            workspacemember__role = "WORKSPACEOWN"
-        ).prefetch_related('boards')
+            workspacemember__user_id = self.request.user.profile.id
+        ).prefetch_related('boards__boardlists__listcard')
         
     def get_object(self):
         """
