@@ -10,7 +10,7 @@ from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.Error.get_or_404 import Base_get_or_404
 
 class AddCardAPIView(CreateAPIView):
-    queryset = Card.objects.filter(is_deleted=False)
+    queryset = Card.objects.all()
     serializer_class = CardSerializer
     permission_classes=[IsAuthenticated]
     authentication_classes=[JWTAuthentication]
@@ -28,7 +28,7 @@ class AddCardAPIView(CreateAPIView):
         }
         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save()
         
 class UpdateCardAPIView(UpdateAPIView):
     serializer_class = CardSerializer
@@ -40,3 +40,4 @@ class UpdateCardAPIView(UpdateAPIView):
         )
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
+    

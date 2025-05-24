@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from Workspace.models import WorkspaceMember, Workspace, Board, List,Card,Comment
 from rest_framework.views import APIView
-from rest_framework.generics import ListAPIView,CreateAPIView, ListCreateAPIView, RetrieveAPIView
-from Workspace.serializers import ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
+from rest_framework.generics import ListAPIView,CreateAPIView,UpdateAPIView, ListCreateAPIView, RetrieveAPIView
+from Workspace.serializers import GetAllListFromBoardSerializer, ListSerializer, BoardSerializer, WorkspaceMemberSerializer,BoardInWorkspaceSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.permissions import IsAuthenticated
@@ -31,3 +31,67 @@ class AddListAPIView(CreateAPIView):
     
     def perform_create(self, serializer):
         serializer.save(created_by=self.request.user)
+        
+class UpdateListAPIView(UpdateAPIView):
+    serializer_class = ListSerializer
+    def get_queryset(self):
+        return List.objects.filter(
+            board__workspace__workspacemember__user_id = self.request.user.profile.id,
+            board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+            is_deleted = False
+        )
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+# class GetAllListFromBoardAPIView(ListAPIView):
+#     serializer_class = ListSerializer
+#     authentication_classes = [JWTAuthentication]
+#     permission_classes=[IsAuthenticated]
+    
+#     def get_queryset(self):
+#         boardId = self.request.query_params.get("boardId")
+#         if boardId:
+#             return List.objects.filter(
+#                 board__id = boardId,
+#                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
+#                 board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+#                 is_deleted = False
+#             )
+#         else:
+#             return List.objects.filter(
+#                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
+#                 board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+#                 is_deleted = False
+#             )
+
+
+class GetAllListFromBoardAPIView(ListAPIView):
+    serializer_class = GetAllListFromBoardSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    def get_queryset(self):
+        boardId = self.request.query_params.get("boardId")
+        if boardId:
+            return List.objects.filter(
+                board__id = boardId,
+                board__workspace__workspacemember__user_id = self.request.user.profile.id,
+                board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+                is_deleted = False
+            )
+        else:
+            return List.objects.filter(
+                board__workspace__workspacemember__user_id = self.request.user.profile.id,
+                board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+                is_deleted = False
+            )
+    def list(self, request, *args, **kwargs):
+        queryset = self.filter_queryset(self.get_queryset())
+        breakpoint()
+        serializer = self.get_serializer(queryset, many=True)
+        response = {
+            "message":"thanh cong",
+            "code":"SUCCESS",
+            "status":200,
+            "data":serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)

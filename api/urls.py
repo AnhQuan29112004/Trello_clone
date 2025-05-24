@@ -9,8 +9,8 @@ from rest_framework_simplejwt.views import (
 )
 from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshView
 from Workspace.view.card.views import AddCardAPIView,UpdateCardAPIView
-from Workspace.view.list.views import AddListAPIView
-from Workspace.view.board.views import AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
+from Workspace.view.list.views import AddListAPIView,GetAllListFromBoardAPIView
+from Workspace.view.board.views import GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
 from Workspace.view.workspace.views import WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
 version_api = config('VERSION_API')
 
@@ -30,5 +30,7 @@ urlpatterns = [
     path(f'{version_api}/workspace/update/<int:pk>', WorkspaceUpdateAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/board/update/<int:pk>', UpdateBoardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/card/update/<int:pk>', UpdateCardAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/board/get', GetAllBoardAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/list/get', GetAllListFromBoardAPIView.as_view(), name='add_workspace'),
     
 ]

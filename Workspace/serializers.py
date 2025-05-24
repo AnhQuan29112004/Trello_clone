@@ -24,10 +24,16 @@ class WorkspaceSerializer(ModelSerializer):
         model = Workspace
         fields = ['id','name','description']
 class CardSerializer(ModelSerializer):
+    listCard = PrimaryKeyRelatedField(queryset=List.objects.all())
     class Meta:
         model = Card
-        fields= ['id','name','description','file','label','start_date','end_date','list',"tasks"]
-    
+        fields= ['id','name','description','file','label','start_date','end_date','listCard','tasks']
+    def create(self, validated_data):
+        return super().create(validated_data)
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        representation['listCard'] = instance.listCard.id 
+        return representation
 class WorkspaceMemberSerializer(ModelSerializer):
     workspaceID = IntegerField(write_only=True)
     member = EmailField(write_only=True)
@@ -98,12 +104,14 @@ class ListSerializer(ModelSerializer):
         return super().create(validated_data)
     
     def get_listcard(self, obj):
+       
         request = self.context.get('request')
         key = request.query_params.get("keySearch", "").strip()
         if key:
             listcard = obj.listcard.filter(name__icontains=key)
         else:
             listcard = obj.listcard.all()
+       
         return CardSerializer(listcard, many=True).data
     
     def to_representation(self, instance):
@@ -116,11 +124,35 @@ class DetailBoardSerializer(ModelSerializer):
         model = Board
         fields = ['id','name','background_color','boardlists']
     def to_representation(self, instance):
+        breakpoint()
         representation = super().to_representation(instance)
-        representation['boardlists'] = ListSerializer(instance.boardlists.all(), many=True,context=self.context).data
+        
+        representation['boardlists'] = ListSerializer(
+        instance.boardlists.all(),
+        many=True,
+        context=self.context  
+    ).data
         return representation
         
     def create(self, validated_data):
         return super().create(validated_data)
 
         
+class AllBoardSerializer(ModelSerializer):
+    class Meta:
+        model = Board
+        fields = ['id','name','background_color']
+    
+    def to_representation(self, instance):  
+        representation = super().to_representation(instance)
+        
+        return representation
+    
+class GetAllListFromBoardSerializer(ModelSerializer):
+    class Meta:
+        model = List
+        fields = ['id','name']
+    
+    def to_representation(self, instance):
+        representation = super().to_representation(instance)
+        return representation
