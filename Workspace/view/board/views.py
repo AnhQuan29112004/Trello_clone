@@ -61,8 +61,10 @@ class GetAllBoardAPIView(ListAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
     def get_queryset(self):
+        workSpaceId = self.request.query_params.get("workspaceId")
         return Board.objects.filter(
             workspace__workspacemember__user_id = self.request.user.profile.id,
+            workspace_id = workSpaceId,
             workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
             is_deleted = False
         )
