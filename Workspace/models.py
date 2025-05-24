@@ -24,8 +24,7 @@ class Board(UtilModel):
 class List(UtilModel):
     name = models.CharField(max_length=50, null=False, blank=False)
     board = models.ForeignKey(Board, on_delete=models.CASCADE, related_name='boardlists')
-    class Meta:
-        unique_together = [['name','board']] 
+    
     def __str__(self):
         return self.name
 
