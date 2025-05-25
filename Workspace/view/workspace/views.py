@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.Error.get_or_404 import Base_get_or_404
 from utils.SearchBase.searchBase import SearchInWorkspaceFilter
-
+from Account.serializers import UserInforSerializer
+from utils.setattr import set_attrs
 class WorkspaceListAPIView(ListAPIView):
     serializer_class = WorkspaceMemberSerializer
     def get_queryset(self):
@@ -161,6 +162,46 @@ class LeaveWorkspaceAPIView(APIView):
             }
             workspace.delete()
             
+            return Response(response, status=status.HTTP_200_OK)
+        except WorkspaceMember.DoesNotExist:
+            return Response({"error": "Workspace not found", 'code':'ERROR','status':404}, status=status.HTTP_404_NOT_FOUND)
+        
+class GetWorkspaceIsOwnedByCrrUserAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    serializer_class = WorkspaceMemberSerializer
+    def get_queryset(self):
+        return WorkspaceMember.objects.filter(user__id = self.request.user.profile.id, role="WORKSPACEOWN")
+    def get(self, request, *args, **kwargs):
+        queryset = self.get_queryset()
+        serializer = self.serializer_class(queryset, many=True)
+        response = {
+            "message":"Success",
+            "code":"SUCCESS",
+            "status":200,
+            "data":serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)
+
+class GetAllUserInWorkspaceAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        workspace_id = kwargs.get('pk')
+        if not workspace_id:
+            return Response({"error": "Workspace ID is required", 'code':'ERROR','status':400}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            workspace_members = WorkspaceMember.objects.filter(workspace_id=workspace_id).select_related('user__user')
+            allUsers = [set_attrs(wm.user.user,role=wm.role,user_id=wm.user_id) for wm in workspace_members]
+            serializer = UserInforSerializer(allUsers, many=True)
+            response = {
+                "message":"Success",
+                "code":"SUCCESS",
+                "status":200,
+                "data":serializer.data
+            }
             return Response(response, status=status.HTTP_200_OK)
         except WorkspaceMember.DoesNotExist:
             return Response({"error": "Workspace not found", 'code':'ERROR','status':404}, status=status.HTTP_404_NOT_FOUND)
