@@ -41,3 +41,16 @@ class UpdateCardAPIView(UpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
     
+class DeleteCardAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        card_id = kwargs.get('pk')
+        card = Base_get_or_404(Card.objects, id=card_id)
+        if card.is_deleted:
+            return Response({"message": "Card already deleted",'code':"ERROR",'status':400}, status=status.HTTP_400_BAD_REQUEST)
+        
+        card.is_deleted = True
+        card.save()
+        return Response({"message": "Card deleted successfully",'code':"SUCCESS","status":204}, status=status.HTTP_204_NO_CONTENT)

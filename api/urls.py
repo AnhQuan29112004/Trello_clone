@@ -8,10 +8,10 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshView
-from Workspace.view.card.views import AddCardAPIView,UpdateCardAPIView
-from Workspace.view.list.views import AddListAPIView,GetAllListFromBoardAPIView
-from Workspace.view.board.views import GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
-from Workspace.view.workspace.views import WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
+from Workspace.view.card.views import DeleteCardAPIView, AddCardAPIView,UpdateCardAPIView
+from Workspace.view.list.views import DeleteListAPIView, AddListAPIView,GetAllListFromBoardAPIView
+from Workspace.view.board.views import DeleteBoardAPIView, GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
+from Workspace.view.workspace.views import LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
 version_api = config('VERSION_API')
 
 urlpatterns = [
@@ -32,5 +32,9 @@ urlpatterns = [
     path(f'{version_api}/card/update/<int:pk>', UpdateCardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/board/get', GetAllBoardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/list/get', GetAllListFromBoardAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/leave/<int:pk>', LeaveWorkspaceAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/list/delete/<int:pk>', DeleteListAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/card/delete/<int:pk>', DeleteCardAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/board/delete/<int:pk>', DeleteBoardAPIView.as_view(), name='add_workspace'),
     
 ]

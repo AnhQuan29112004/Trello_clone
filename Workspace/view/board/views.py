@@ -81,3 +81,17 @@ class GetAllBoardAPIView(ListAPIView):
         }   
         
         return Response(response, status=status.HTTP_200_OK)
+    
+class DeleteBoardAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs):
+        board_id = kwargs.get('pk')
+        board = Base_get_or_404(Board.objects, id=board_id)
+        if board.is_deleted:
+            return Response({"message": "Board already deleted",'code':"ERROR",'status':400}, status=status.HTTP_400_BAD_REQUEST)
+        
+        board.is_deleted = True
+        board.save()
+        return Response({"message": "Board deleted successfully",'code':"SUCCESS","status":204}, status=status.HTTP_204_NO_CONTENT)

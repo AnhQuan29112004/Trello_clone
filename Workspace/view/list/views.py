@@ -43,26 +43,6 @@ class UpdateListAPIView(UpdateAPIView):
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
     
-# class GetAllListFromBoardAPIView(ListAPIView):
-#     serializer_class = ListSerializer
-#     authentication_classes = [JWTAuthentication]
-#     permission_classes=[IsAuthenticated]
-    
-#     def get_queryset(self):
-#         boardId = self.request.query_params.get("boardId")
-#         if boardId:
-#             return List.objects.filter(
-#                 board__id = boardId,
-#                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
-#                 board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
-#                 is_deleted = False
-#             )
-#         else:
-#             return List.objects.filter(
-#                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
-#                 board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
-#                 is_deleted = False
-#             )
 
 
 class GetAllListFromBoardAPIView(ListAPIView):
@@ -72,6 +52,7 @@ class GetAllListFromBoardAPIView(ListAPIView):
     def get_queryset(self):
         boardId = self.request.query_params.get("boardId")
         if boardId:
+            breakpoint()
             return List.objects.filter(
                 board__id = boardId,
                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
@@ -95,3 +76,31 @@ class GetAllListFromBoardAPIView(ListAPIView):
             "data":serializer.data
         }
         return Response(response, status=status.HTTP_200_OK)
+    
+    
+class DeleteListAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def delete(self, request, *args, **kwargs,):
+        list_id = kwargs.get('pk')
+        list_instance = Base_get_or_404(List.objects, id=list_id)
+        
+        if not list_instance.is_deleted:
+            list_instance.is_deleted = True
+            list_instance.save()
+            response = {
+                "message": "Xoa thanh cong",
+                "code": "SUCCESS",
+                "status": 200,
+                "data": {}
+            }
+            return Response(response, status=status.HTTP_200_OK)
+        else:
+            response = {
+                "message": "List da bi xoa",
+                "code": "ERROR",
+                "status": 400,
+                "data": {}
+            }
+            return Response(response, status=status.HTTP_400_BAD_REQUEST)

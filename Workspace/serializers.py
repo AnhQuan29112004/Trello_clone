@@ -58,6 +58,8 @@ class WorkspaceMemberSerializer(ModelSerializer):
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        breakpoint()
+        representation['owner'] = WorkspaceMember.objects.get(workspace=instance.workspace.id, role = "WORKSPACEOWN").user.user.username
         return representation
         
 class BoardInWorkspaceSerializer(ModelSerializer):
@@ -92,7 +94,6 @@ class BoardInWorkspaceSerializer(ModelSerializer):
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['role'] = WorkspaceMember.objects.get(workspace=instance.id, user=self.context['request'].user.profile.id).role
-       
         return representation
         
 class ListSerializer(ModelSerializer):
@@ -108,9 +109,9 @@ class ListSerializer(ModelSerializer):
         request = self.context.get('request')
         key = request.query_params.get("keySearch", "").strip()
         if key:
-            listcard = obj.listcard.filter(name__icontains=key)
+            listcard = obj.listcard.filter(name__icontains=key, is_deleted=False)
         else:
-            listcard = obj.listcard.all()
+            listcard = obj.listcard.filter(is_deleted=False)
        
         return CardSerializer(listcard, many=True).data
     
@@ -128,7 +129,7 @@ class DetailBoardSerializer(ModelSerializer):
         representation = super().to_representation(instance)
         
         representation['boardlists'] = ListSerializer(
-        instance.boardlists.all(),
+        instance.boardlists.filter(is_deleted=False),
         many=True,
         context=self.context  
     ).data

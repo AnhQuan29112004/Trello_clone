@@ -135,3 +135,32 @@ class WorkspaceUpdateAPIView(UpdateAPIView):
         return Response(response, status=status.HTTP_200_OK)
     def perform_update(self, serializer):
         serializer.save(updated_by=self.request.user)
+    
+        
+class LeaveWorkspaceAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def delete(self, request,pk):
+        try:
+            
+            workspace = WorkspaceMember.objects.get(workspace_id=pk, user__id=request.user.profile.id)
+            if workspace.role == "WORKSPACEOWN":
+                response = {
+                    "message": "Cannot leave workspace as owner",
+                    "code": "ERROR",
+                    "status": 400,
+                    "data": None
+                }
+                return Response(response, status=status.HTTP_400_BAD_REQUEST)
+            response = {
+                "message":"Leave workspace successfully",
+                "code":"SUCCESS",
+                "status":200,
+                "data":None
+            }
+            workspace.delete()
+            
+            return Response(response, status=status.HTTP_200_OK)
+        except WorkspaceMember.DoesNotExist:
+            return Response({"error": "Workspace not found", 'code':'ERROR','status':404}, status=status.HTTP_404_NOT_FOUND)

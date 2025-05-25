@@ -8,5 +8,5 @@ from Workspace.models import WorkspaceMember, Workspace
 def addRoleToWorkspace(sender, instance, created, **kwargs):
     if created:
         nameWP = "wp" + instance.user.username
-        newWP = Workspace.objects.create(name = nameWP, created_by_id = instance.id)
-        WorkspaceMember.objects.create(workspace_id = newWP.id, user_id = instance.id)
+        newWP = Workspace.objects.create(name = nameWP, created_by_id = instance.user.id)
+        WorkspaceMember.objects.create(workspace_id = newWP.id, user_id = instance.id, role = "WORKSPACEOWN")
