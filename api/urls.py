@@ -11,7 +11,7 @@ from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshVi
 from Workspace.view.card.views import DeleteCardAPIView, AddCardAPIView,UpdateCardAPIView
 from Workspace.view.list.views import DeleteListAPIView, AddListAPIView,GetAllListFromBoardAPIView
 from Workspace.view.board.views import DeleteBoardAPIView, GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
-from Workspace.view.workspace.views import LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
+from Workspace.view.workspace.views import GetAllUserInWorkspaceAPIView, GetWorkspaceIsOwnedByCrrUserAPIView, LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
 version_api = config('VERSION_API')
 
 urlpatterns = [
@@ -36,5 +36,6 @@ urlpatterns = [
     path(f'{version_api}/list/delete/<int:pk>', DeleteListAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/card/delete/<int:pk>', DeleteCardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/board/delete/<int:pk>', DeleteBoardAPIView.as_view(), name='add_workspace'),
-    
+    path(f'{version_api}/workspace-owned-by-current-user/get', GetWorkspaceIsOwnedByCrrUserAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/get-all-user-in-workspace/<int:pk>', GetAllUserInWorkspaceAPIView.as_view(), name='get_all_user_in_workspace'),    
 ]
