@@ -46,7 +46,6 @@ class WorkspaceMemberSerializer(ModelSerializer):
         
     def create(self, validated_data):
         account = Account.objects.get(email=validated_data['member'])
-        breakpoint()
         newUser = UserProfile.objects.get(user=account)
         workspace = Workspace.objects.get(id=validated_data['workspaceID'])
         instance= WorkspaceMember.objects.create(
@@ -58,7 +57,7 @@ class WorkspaceMemberSerializer(ModelSerializer):
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        breakpoint()
+        representation['user'] = instance.user.user.username
         representation['owner'] = WorkspaceMember.objects.get(workspace=instance.workspace.id, role = "WORKSPACEOWN").user.user.username
         return representation
         
