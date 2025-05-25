@@ -36,6 +36,6 @@ urlpatterns = [
     path(f'{version_api}/list/delete/<int:pk>', DeleteListAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/card/delete/<int:pk>', DeleteCardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/board/delete/<int:pk>', DeleteBoardAPIView.as_view(), name='add_workspace'),
-    path(f'{version_api}/workspace-owned-by-current-user/get', GetWorkspaceIsOwnedByCrrUserAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/workspace-owned-by-current-user/get', GetWorkspaceIsOwnedByCrrUserAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/get-all-user-in-workspace/<int:pk>', GetAllUserInWorkspaceAPIView.as_view(), name='get_all_user_in_workspace'),    
 ]
