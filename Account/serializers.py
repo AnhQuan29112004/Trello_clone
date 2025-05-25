@@ -28,9 +28,11 @@ class CustormToken(TokenObtainPairSerializer):
 
 
 class UserInforSerializer(serializers.ModelSerializer):
+    role = serializers.CharField(read_only=True)
+    user_id= serializers.IntegerField(read_only=True)
     class Meta:
         model = Account
-        fields = ['email','username','phone_number','role','last_name','first_name']
+        fields = ['user_id','email','username','phone_number','last_name','first_name','role']
         
 class UserProfileSerializer(serializers.ModelSerializer):
     class Meta:
