@@ -2,7 +2,7 @@ from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, 
 from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
 from Account.serializers import UserProfileSerializer
 from Account.models import Account, UserProfile
-
+import json
 
 class BoardSerializer(ModelSerializer):
     workspace = PrimaryKeyRelatedField(
@@ -24,12 +24,30 @@ class WorkspaceSerializer(ModelSerializer):
         model = Workspace
         fields = ['id','name','description']
 class CardSerializer(ModelSerializer):
-    listCard = PrimaryKeyRelatedField(queryset=List.objects.all())
+    listCard = PrimaryKeyRelatedField(queryset=List.objects.filter(is_deleted=False), write_only=True, required=False)
     class Meta:
         model = Card
-        fields= ['id','name','description','file','label','start_date','end_date','listCard','tasks']
+        fields= ['id','index','name','description','file','label','start_date','end_date','listCard','tasks']
     def create(self, validated_data):
         return super().create(validated_data)
+    
+    def update(self, instance, validated_data):
+        request = self.context.get("request").data
+        new_tasks = request.get("tasks", {})
+        if isinstance(new_tasks, str):
+            try:
+                new_tasks = json.loads(new_tasks)
+            except json.JSONDecodeError:
+                new_tasks = {}
+        crr_tasks = instance.tasks or {}
+        for i in new_tasks:
+            if i not in instance.tasks:
+                crr_tasks[i] = "Chưa hoàn thành"
+            else:
+                crr_tasks[i] = new_tasks[i]
+        validated_data['tasks'] = crr_tasks
+        return super().update(instance, validated_data)
+    
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['listCard'] = instance.listCard.id 
@@ -64,17 +82,18 @@ class WorkspaceMemberSerializer(ModelSerializer):
 class BoardInWorkspaceSerializer(ModelSerializer):
     boards = SerializerMethodField()
     cards = SerializerMethodField()
+    user = SerializerMethodField()
     class Meta:
         model = Board
-        fields = ['id','name','background_color','boards','cards']
+        fields = ['id','name','background_color','boards','cards','user']
         
     def get_boards(self,obj):
         request = self.context.get('request')
         key = request.query_params.get("keySearch", "").strip()
         if key:
-            board = obj.boards.filter(name__icontains=key)
+            board = obj.boards.filter(name__icontains=key, is_deleted=False)
         else:
-            board = obj.boards.all()
+            board = obj.boards.filter(is_deleted=False)
         return BoardSerializer(board, many=True).data
     
     def get_cards(self,obj):
@@ -85,11 +104,20 @@ class BoardInWorkspaceSerializer(ModelSerializer):
 
             for board in obj.boards.all():
                 for boardlist in board.boardlists.all():
-                    cards = boardlist.listcard.filter(name__icontains=key)
+                    cards = boardlist.listcard.filter(name__icontains=key,is_deleted=False)
                     matching_cards.extend(cards)
         else:
             return []
         return CardSerializer(matching_cards, many=True).data
+    def get_user(self, obj):
+        owner = WorkspaceMember.objects.filter(
+            workspace=obj.id,
+            role='WORKSPACEOWN'
+        ).select_related('user').first()
+
+        if owner:
+            return owner.user.user.username
+        return None
     def to_representation(self, instance):
         representation = super().to_representation(instance)
         representation['role'] = WorkspaceMember.objects.get(workspace=instance.id, user=self.context['request'].user.profile.id).role
@@ -108,9 +136,9 @@ class ListSerializer(ModelSerializer):
         request = self.context.get('request')
         key = request.query_params.get("keySearch", "").strip()
         if key:
-            listcard = obj.listcard.filter(name__icontains=key, is_deleted=False)
+            listcard = obj.listcard.filter(name__icontains=key, is_deleted=False).order_by('index')
         else:
-            listcard = obj.listcard.filter(is_deleted=False)
+            listcard = obj.listcard.filter(is_deleted=False).order_by('index')
        
         return CardSerializer(listcard, many=True).data
     
@@ -124,7 +152,6 @@ class DetailBoardSerializer(ModelSerializer):
         model = Board
         fields = ['id','name','background_color','boardlists']
     def to_representation(self, instance):
-        breakpoint()
         representation = super().to_representation(instance)
         
         representation['boardlists'] = ListSerializer(

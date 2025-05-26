@@ -42,6 +42,16 @@ class DetailBoardAPIView(RetrieveAPIView):
     permission_classes=[IsAuthenticated]
     def get_serializer_context(self):
         return {'request': self.request}
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        response = {
+            "message": "Get board details successfully",
+            "code": "SUCCESS",
+            "status": 200,
+            "data": serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)
     
     
 class UpdateBoardAPIView(UpdateAPIView):

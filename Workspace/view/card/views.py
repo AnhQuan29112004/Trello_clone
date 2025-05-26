@@ -32,14 +32,17 @@ class AddCardAPIView(CreateAPIView):
         
 class UpdateCardAPIView(UpdateAPIView):
     serializer_class = CardSerializer
-    def get_queryset(self):
-        return Card.objects.filter(
-            list__board__workspace__workspacemember__user_id = self.request.user.profile.id,
-            list__board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
-            is_deleted = False
-        )
     authentication_classes = [JWTAuthentication]
     permission_classes=[IsAuthenticated]
+    def get_queryset(self):
+        return Card.objects.filter(
+            listCard__board__workspace__workspacemember__user_id = self.request.user.profile.id,
+            listCard__board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+            is_deleted = False
+        )
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
     
 class DeleteCardAPIView(APIView):
     authentication_classes = [JWTAuthentication]
@@ -54,3 +57,28 @@ class DeleteCardAPIView(APIView):
         card.is_deleted = True
         card.save()
         return Response({"message": "Card deleted successfully",'code':"SUCCESS","status":204}, status=status.HTTP_204_NO_CONTENT)
+class GetCardByIDAPIView(RetrieveAPIView):
+    serializer_class = CardSerializer
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def get_queryset(self):
+        return Card.objects.filter(
+            listCard__board__workspace__workspacemember__user_id = self.request.user.profile.id,
+            listCard__board__workspace__workspacemember__role__in = ["WORKSPACEOWN","MEMBER"],
+            is_deleted = False
+        )
+    
+    def get_serializer_context(self):
+        return {'request': self.request}
+    
+    def retrieve(self, request, *args, **kwargs):
+        instance = self.get_object()
+        serializer = self.get_serializer(instance)
+        response = {
+            "message": "Success",
+            "code": "SUCCESS",
+            "status": 200,
+            "data": serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)

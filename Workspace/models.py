@@ -37,7 +37,8 @@ class Card(UtilModel):
     start_date = models.DateTimeField(null=True, blank=True)
     end_date = models.DateTimeField(null=True, blank=True)
     listCard = models.ForeignKey(List, on_delete=models.CASCADE, related_name="listcard",null=True, blank=True)
-    tasks = models.JSONField(null=True, blank=True,default=list)
+    tasks = models.JSONField(null=True, blank=True,default=dict)
+    index = models.IntegerField(default=0, null=True, blank=True)
     class Meta:
         unique_together = [['name','listCard']] 
     def __str__(self):

@@ -8,7 +8,7 @@ from rest_framework_simplejwt.views import (
     TokenRefreshView,
 )
 from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshView
-from Workspace.view.card.views import DeleteCardAPIView, AddCardAPIView,UpdateCardAPIView
+from Workspace.view.card.views import GetCardByIDAPIView, DeleteCardAPIView, AddCardAPIView,UpdateCardAPIView
 from Workspace.view.list.views import DeleteListAPIView, AddListAPIView,GetAllListFromBoardAPIView
 from Workspace.view.board.views import DeleteBoardAPIView, GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
 from Workspace.view.workspace.views import GetAllUserInWorkspaceAPIView, GetWorkspaceIsOwnedByCrrUserAPIView, LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
@@ -38,4 +38,6 @@ urlpatterns = [
     path(f'{version_api}/board/delete/<int:pk>', DeleteBoardAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/workspace-owned-by-current-user/get', GetWorkspaceIsOwnedByCrrUserAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/get-all-user-in-workspace/<int:pk>', GetAllUserInWorkspaceAPIView.as_view(), name='get_all_user_in_workspace'),    
+    path(f'{version_api}/card/get/<int:pk>', GetCardByIDAPIView.as_view(), name='add_workspace'),
+
 ]
