@@ -2,6 +2,7 @@ from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, 
 from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
 from Account.serializers import UserProfileSerializer
 from Account.models import Account, UserProfile
+from utils.DictToObject.DictToObject import DictToObj
 import json
 
 class BoardSerializer(ModelSerializer):
@@ -39,10 +40,10 @@ class CardSerializer(ModelSerializer):
                 new_tasks = json.loads(new_tasks)
             except json.JSONDecodeError:
                 new_tasks = {}
-        crr_tasks = instance.tasks or {}
+        crr_tasks =instance.tasks or {} 
         for i in new_tasks:
             if i not in instance.tasks:
-                crr_tasks[i] = "Chưa hoàn thành"
+                crr_tasks[i] = 0
             else:
                 crr_tasks[i] = new_tasks[i]
         validated_data['tasks'] = crr_tasks
@@ -50,6 +51,12 @@ class CardSerializer(ModelSerializer):
     
     def to_representation(self, instance):
         representation = super().to_representation(instance)
+        representation['tasks'] = []
+        for key, value in instance.tasks.items():
+            representation['tasks'].append({
+                'task': key,
+                'status': value
+            })
         representation['listCard'] = instance.listCard.id 
         return representation
 class WorkspaceMemberSerializer(ModelSerializer):
