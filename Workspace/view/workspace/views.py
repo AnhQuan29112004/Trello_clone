@@ -9,7 +9,7 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.Error.get_or_404 import Base_get_or_404
 from utils.SearchBase.searchBase import SearchInWorkspaceFilter
-from Account.serializers import UserProfileSerializer
+from Account.serializers import UserProfileSerializer,UserInforSerializer
 from Account.models import UserProfile
 from utils.setattr import set_attrs
 class WorkspaceListAPIView(ListAPIView):

@@ -40,6 +40,6 @@ urlpatterns = [
     path(f'{version_api}/workspace/get-all-user-in-workspace/<int:pk>', GetAllUserInWorkspaceAPIView.as_view(), name='get_all_user_in_workspace'),    
     path(f'{version_api}/card/get/<int:pk>', GetCardByIDAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/search-user', SearchUserWhenAddMemberAPIView.as_view(), name='search_user_in_workspace'),    
-    path(f'{version_api}/list/<int:pk>', UpdateListAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/list/update/<int:pk>', UpdateListAPIView.as_view(), name='add_workspace'),
 
 ]
