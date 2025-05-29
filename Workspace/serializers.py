@@ -55,12 +55,16 @@ class CardSerializer(ModelSerializer):
                 'content': comment,
                 'author': self.context['request'].user.profile,  # Assuming the author is the current user
             }
-            if not Comment.objects.get(content=comment_data['content'], author=comment_data['author']):
+            comment_instance = Comment.objects.filter(
+                content=comment_data['content'],
+                author=comment_data['author']
+            ).first()
+            if comment_instance is None:
                 
                 comment_instance = Comment.objects.create(**comment_data)
                 instance.comment.add(comment_instance)
             else:
-                comment_instance = Comment.objects.get(content=comment_data['content'], author=comment_data['author'])
+                comment_instance = Comment.objects.get(comment_cards__card_id=instance.id,content=comment_data['content'], author=comment_data['author'])
                 comment_instance.content = comment_data['content']
                 comment_instance.save()
         if isinstance(new_tasks, str):

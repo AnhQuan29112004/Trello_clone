@@ -30,7 +30,7 @@ class List(UtilModel):
 
 class Comment(UtilModel):
     content = models.TextField(null=False, blank=False)
-    author = models.OneToOneField(UserProfile, on_delete=models.CASCADE, related_name='membercomments')
+    author = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='membercomments')
     def __str__(self):
         return self.content
     
