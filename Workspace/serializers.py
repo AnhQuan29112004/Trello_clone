@@ -1,9 +1,10 @@
-from rest_framework.serializers import ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField, IntegerField, EmailField
-from Workspace.models import WorkspaceMember, Workspace, Board, List, Card, CardMember
+from rest_framework.serializers import DateTimeField, ModelSerializer, PrimaryKeyRelatedField, SerializerMethodField, IntegerField, EmailField
+from Workspace.models import Comment, WorkspaceMember, Workspace, Board, List, Card, CardMember
 from Account.serializers import UserProfileSerializer
 from Account.models import Account, UserProfile
 from utils.DictToObject.DictToObject import DictToObj
 import json
+from datetime import datetime
 
 class BoardSerializer(ModelSerializer):
     workspace = PrimaryKeyRelatedField(
@@ -25,16 +26,43 @@ class WorkspaceSerializer(ModelSerializer):
         model = Workspace
         fields = ['id','name','description']
 class CardSerializer(ModelSerializer):
+    start_date = DateTimeField(input_formats=["%d/%m/%Y"])
+    end_date = DateTimeField(input_formats=["%d/%m/%Y"])
+    comment = SerializerMethodField()
     listCard = PrimaryKeyRelatedField(queryset=List.objects.filter(is_deleted=False), write_only=True, required=False)
     class Meta:
         model = Card
-        fields= ['id','index','name','description','file','label','start_date','end_date','listCard','tasks']
+        fields= ['id','index','name','description','file','label','start_date','end_date','listCard','tasks','comment']
+    def get_comment(self, obj):
+        comments = obj.comment.all()
+        return [{
+            'id': comment.id,
+            'content': comment.content,
+            'author': UserProfileSerializer(comment.author).data,
+            'created_at': comment.created_at,
+            'updated_at': comment.updated_at
+        } for comment in comments]
+    
     def create(self, validated_data):
         return super().create(validated_data)
     
     def update(self, instance, validated_data):
         request = self.context.get("request").data
         new_tasks = request.get("tasks", {})
+        comment = request.get("comment", '')
+        if comment:
+            comment_data = {
+                'content': comment,
+                'author': self.context['request'].user.profile,  # Assuming the author is the current user
+            }
+            if not Comment.objects.get(content=comment_data['content'], author=comment_data['author']):
+                
+                comment_instance = Comment.objects.create(**comment_data)
+                instance.comment.add(comment_instance)
+            else:
+                comment_instance = Comment.objects.get(content=comment_data['content'], author=comment_data['author'])
+                comment_instance.content = comment_data['content']
+                comment_instance.save()
         if isinstance(new_tasks, str):
             try:
                 new_tasks = json.loads(new_tasks)
@@ -47,6 +75,8 @@ class CardSerializer(ModelSerializer):
             else:
                 crr_tasks[i] = new_tasks[i]
         validated_data['tasks'] = crr_tasks
+        validated_data['start_date'] = datetime.strptime(request.get('start_date'), "%d/%m/%Y") if request.get('start_date') else None
+        validated_data['end_date'] = datetime.strptime(request.get('end_date'), "%d/%m/%Y") if request.get('end_date') else None
         return super().update(instance, validated_data)
     
     def to_representation(self, instance):
@@ -58,6 +88,7 @@ class CardSerializer(ModelSerializer):
                 'status': value
             })
         representation['listCard'] = instance.listCard.id 
+        representation['nameList'] = instance.listCard.name
         return representation
 class WorkspaceMemberSerializer(ModelSerializer):
     workspaceID = IntegerField(write_only=True)

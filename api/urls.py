@@ -9,9 +9,9 @@ from rest_framework_simplejwt.views import (
 )
 from Account.views import RegisterAPI, GetCrrUser,LoginAPI, CustomTokenRefreshView
 from Workspace.view.card.views import GetCardByIDAPIView, DeleteCardAPIView, AddCardAPIView,UpdateCardAPIView
-from Workspace.view.list.views import DeleteListAPIView, AddListAPIView,GetAllListFromBoardAPIView
+from Workspace.view.list.views import UpdateListAPIView, DeleteListAPIView, AddListAPIView,GetAllListFromBoardAPIView
 from Workspace.view.board.views import DeleteBoardAPIView, GetAllBoardAPIView, AddBoardAPIView, DetailBoardAPIView,UpdateBoardAPIView
-from Workspace.view.workspace.views import GetAllUserInWorkspaceAPIView, GetWorkspaceIsOwnedByCrrUserAPIView, LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
+from Workspace.view.workspace.views import SearchUserWhenAddMemberAPIView, GetAllUserInWorkspaceAPIView, GetWorkspaceIsOwnedByCrrUserAPIView, LeaveWorkspaceAPIView, WorkspaceGetByIDView, WorkspaceUpdateAPIView, WorkspaceListAPIView, WorkspaceAddAPIView, AddUserToWorkspaceAPIView
 version_api = config('VERSION_API')
 
 urlpatterns = [
@@ -39,5 +39,7 @@ urlpatterns = [
     path(f'{version_api}/workspace/workspace-owned-by-current-user/get', GetWorkspaceIsOwnedByCrrUserAPIView.as_view(), name='add_workspace'),
     path(f'{version_api}/workspace/get-all-user-in-workspace/<int:pk>', GetAllUserInWorkspaceAPIView.as_view(), name='get_all_user_in_workspace'),    
     path(f'{version_api}/card/get/<int:pk>', GetCardByIDAPIView.as_view(), name='add_workspace'),
+    path(f'{version_api}/workspace/search-user', SearchUserWhenAddMemberAPIView.as_view(), name='search_user_in_workspace'),    
+    path(f'{version_api}/list/<int:pk>', UpdateListAPIView.as_view(), name='add_workspace'),
 
 ]

@@ -5,7 +5,6 @@ class SearchInWorkspaceFilter(BaseFilterBackend):
         key = request.query_params.get("keySearch", "").strip()
         if not key:
             return queryset
-        breakpoint()
         return queryset.filter(
             Q(boards__name__icontains=key) |
             Q(boards__boardlists__listcard__name__icontains=key)

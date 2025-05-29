@@ -28,7 +28,7 @@ class AddBoardAPIView(CreateAPIView):
         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
 
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save(created_by=self.request.user.profile)
         
 class DetailBoardAPIView(RetrieveAPIView):
     serializer_class = DetailBoardSerializer

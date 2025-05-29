@@ -30,7 +30,7 @@ class AddListAPIView(CreateAPIView):
         return Response(response, status=status.HTTP_201_CREATED, headers=headers)
     
     def perform_create(self, serializer):
-        serializer.save(created_by=self.request.user)
+        serializer.save(created_by=self.request.user.profile)
         
 class UpdateListAPIView(UpdateAPIView):
     serializer_class = ListSerializer
@@ -52,7 +52,6 @@ class GetAllListFromBoardAPIView(ListAPIView):
     def get_queryset(self):
         boardId = self.request.query_params.get("boardId")
         if boardId:
-            breakpoint()
             return List.objects.filter(
                 board__id = boardId,
                 board__workspace__workspacemember__user_id = self.request.user.profile.id,
@@ -67,7 +66,6 @@ class GetAllListFromBoardAPIView(ListAPIView):
             )
     def list(self, request, *args, **kwargs):
         queryset = self.filter_queryset(self.get_queryset())
-        breakpoint()
         serializer = self.get_serializer(queryset, many=True)
         response = {
             "message":"thanh cong",

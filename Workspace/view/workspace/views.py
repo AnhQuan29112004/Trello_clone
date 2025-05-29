@@ -9,7 +9,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework_simplejwt.authentication import JWTAuthentication
 from utils.Error.get_or_404 import Base_get_or_404
 from utils.SearchBase.searchBase import SearchInWorkspaceFilter
-from Account.serializers import UserInforSerializer
+from Account.serializers import UserProfileSerializer
+from Account.models import UserProfile
 from utils.setattr import set_attrs
 class WorkspaceListAPIView(ListAPIView):
     serializer_class = WorkspaceMemberSerializer
@@ -205,3 +206,24 @@ class GetAllUserInWorkspaceAPIView(APIView):
             return Response(response, status=status.HTTP_200_OK)
         except WorkspaceMember.DoesNotExist:
             return Response({"error": "Workspace not found", 'code':'ERROR','status':404}, status=status.HTTP_404_NOT_FOUND)
+        
+        
+class SearchUserWhenAddMemberAPIView(APIView):
+    authentication_classes = [JWTAuthentication]
+    permission_classes=[IsAuthenticated]
+    
+    def get(self, request, *args, **kwargs):
+        key = request.query_params.get('keySearch', '').strip()
+        if not key:
+            return Response({"error": "Key search is required", 'code':'ERROR','status':400}, status=status.HTTP_400_BAD_REQUEST)
+        users = UserProfile.objects.filter(user__email__icontains = key).select_related('user')
+        if not users.exists():
+            return Response({"message": "No users found", 'code':'ERROR','status':404}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserProfileSerializer(users, many=True)
+        response = {
+            "message":"Success",
+            "code":"SUCCESS",
+            "status":200,
+            "data":serializer.data
+        }
+        return Response(response, status=status.HTTP_200_OK)
