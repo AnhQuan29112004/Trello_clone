@@ -163,6 +163,8 @@ class BoardInWorkspaceSerializer(ModelSerializer):
         
 class ListSerializer(ModelSerializer):
     listcard = SerializerMethodField()
+    board = PrimaryKeyRelatedField(queryset=Board.objects.all(), required=False, allow_null=True)
+
     class Meta:
         model = List
         fields = ['id','name','board','listcard']
