@@ -26,8 +26,8 @@ class WorkspaceSerializer(ModelSerializer):
         model = Workspace
         fields = ['id','name','description']
 class CardSerializer(ModelSerializer):
-    start_date = DateTimeField(input_formats=["%d/%m/%Y"])
-    end_date = DateTimeField(input_formats=["%d/%m/%Y"])
+    start_date = DateTimeField(input_formats=["%d/%m/%Y"], required=False, allow_null=True)
+    end_date = DateTimeField(input_formats=["%d/%m/%Y"],required=False, allow_null=True)
     comment = SerializerMethodField()
     listCard = PrimaryKeyRelatedField(queryset=List.objects.filter(is_deleted=False), write_only=True, required=False)
     class Meta:
