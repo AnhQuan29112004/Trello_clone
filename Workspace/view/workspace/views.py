@@ -136,7 +136,7 @@ class WorkspaceUpdateAPIView(UpdateAPIView):
         }
         return Response(response, status=status.HTTP_200_OK)
     def perform_update(self, serializer):
-        serializer.save(updated_by=self.request.user)
+        serializer.save(updated_by=self.request.user.profile)
     
         
 class LeaveWorkspaceAPIView(APIView):
@@ -145,8 +145,8 @@ class LeaveWorkspaceAPIView(APIView):
     
     def delete(self, request,pk):
         try:
-            
-            workspace = WorkspaceMember.objects.get(workspace_id=pk, user__id=request.user.profile.id)
+            email = request.data.get('email')
+            workspace = WorkspaceMember.objects.get(workspace_id=pk, user__user__email=email)
             if workspace.role == "WORKSPACEOWN":
                 response = {
                     "message": "Cannot leave workspace as owner",
